@@ -1,25 +1,69 @@
 #!/usr/bin/php -q
 <?php
 $curPAN = '';
-$cur=array('pan'=>'','balance'=>0,'verify'=>0);
+$cur=array('pan'=>'','balance'=>0,'verify'=>0, 'tm'=>'');
 while ($line = fgets(STDIN)) {
 	if (strpos($line, 'PAN={')===false) continue;
+	if (strpos($line, 'ANT2::')!==false) continue;
+
 	$S1 = substr($line, strpos($line, 'PAN={'));
 	list($P,$B) = explode(' ', $S1);
 	$pan = substr($P,5,19);
 	$B1 = substr($B, strpos($B, '={')+2);
 	list($balance, $trail) = explode('}',$B1);
+	$tm = substr($line,1,15);
 	
-	if ($cur['pan']=='') {
+	if ($cur['pan']=='') {	// New Cycle
 		$cur['pan'] = $pan;
 		$cur['balance'] = (int)$balance;
+		$cur['tm'] = $tm;
 	}
-	else {
-		if ($cur['pan']!=
+	else { // Existing Cycle
+		if ($cur['pan']!=$pan) {	// Something so wrong
+			show_err($cur);
+			clear_cur($cur);
+			$cur['pan'] = $pan;
+			$cur['balance'] = (int)$balance;
+			$cur['tm'] = $tm;
+		}
+		else {	// Normal complete Pan Pair
+			$cur['verify'] = (int)$balance;
+			show_cur($cur);
+			clear_cur($cur);
+		}
 	}
 
-	print($S1);
-	print($pan.PHP_EOL);
-	print($balance.PHP_EOL);
+//	print($S1);
+//	print($pan.PHP_EOL);
+//	print($balance.PHP_EOL);
 }
+
+//----------------------------------------------------------------------------
+function clear_cur(&$cur) {
+	$cur['pan'] = '';
+	$cur['balance'] = 0;
+	$cur['verify'] = 0;
+	$cur['tm'] = '';
+}
+//----------------------------------------------------------------------------
+function show_cur($cur) {
+	print(
+		$cur['tm']."\t".
+		$cur['pan']."\t".
+		number_format($cur['balance'])."\t".
+		number_format($cur['verify'])."\t".
+		(($cur['balance']!=$cur['verify'])?('!!!'):('')).
+		"\n"
+		);
+}
+//----------------------------------------------------------------------------
+function show_err($cur) {
+	print(
+		$cur['tm']."\t".
+		$cur['pan']."\t".
+		number_format($cur['balance'])."\t**ERR**".
+		"\n"
+		);
+}
+//----------------------------------------------------------------------------
 ?>

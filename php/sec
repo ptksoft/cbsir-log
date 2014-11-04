@@ -10,7 +10,7 @@ if ($iSec1>$iSec2) dead('Invalid Minute Range');
 if ($iSec1 < 0 || $iSec1 > 59 || $iSec2 < 0 || $iSec2 > 59) dead('Invalid Minute Value');
 $S1 = sprintf("%02d", $iSec1);
 $S2 = sprintf("%02d", $iSec2);
-#echo 'S1=',$S1, ' S2=',$S2, PHP_EOL;
+//echo 'S1=',$S1, ' S2=',$S2, PHP_EOL;
 
 while ($line = fgets(STDIN)) {
 	$SC = substr($line,6,2);
