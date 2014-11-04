@@ -1,2 +1,7 @@
+<?php
 # Base/Core file for SCRIPT and center
 
+define('LANE3','/home/cbsir/logs/ee03');
+
+
+?>
