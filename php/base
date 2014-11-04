@@ -1,7 +1,19 @@
 <?php
 # Base/Core file for SCRIPT and center
 
-define('LANE3','/home/cbsir/logs/ee03');
+#Path to Store Logs files for each lane
+$laneLogFolder = array(
+	3 => '/home/cbsir/logs/ee03',
+	4 => '/home/cbsir/logs/ex04',
+	5 => '/home/cbsir/logs/ex05'
+);
 
+//----------------------------------------------------------------------------
+function dead($msg) {
+    die($msg.PHP_EOL.PHP_EOL);
+}
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 ?>

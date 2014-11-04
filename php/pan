@@ -1,0 +1,25 @@
+#!/usr/bin/php -q
+<?php
+$curPAN = '';
+$cur=array('pan'=>'','balance'=>0,'verify'=>0);
+while ($line = fgets(STDIN)) {
+	if (strpos($line, 'PAN={')===false) continue;
+	$S1 = substr($line, strpos($line, 'PAN={'));
+	list($P,$B) = explode(' ', $S1);
+	$pan = substr($P,5,19);
+	$B1 = substr($B, strpos($B, '={')+2);
+	list($balance, $trail) = explode('}',$B1);
+	
+	if ($cur['pan']=='') {
+		$cur['pan'] = $pan;
+		$cur['balance'] = (int)$balance;
+	}
+	else {
+		if ($cur['pan']!=
+	}
+
+	print($S1);
+	print($pan.PHP_EOL);
+	print($balance.PHP_EOL);
+}
+?>

@@ -4,6 +4,7 @@ require_once('base');
 
 echo "Test Script for fetch LOG Files", PHP_EOL;
 echo 'Lane 3 = ', LANE3, PHP_EOL;
+echo __FILE__, PHP_EOL;
 
 
 ?>
