@@ -1,0 +1,8 @@
+#!/usr/bin/php -q
+<?php
+require_once('base');
+
+echo "Test Script for fetch LOG Files", PHP_EOL;
+
+
+?>
