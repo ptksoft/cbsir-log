@@ -1,0 +1,20 @@
+#!/usr/bin/php -q
+<?php
+while ($line = fgets(STDIN)) {
+	if (strpos($line, 'ANT1::sockTransaction')!==false) continue;
+	if (strpos($line, 'Shift New')!==false) {
+		echo str_repeat('=',79),PHP_EOL,$line,str_repeat('=',79),PHP_EOL;
+	}
+	else if (strpos($line, 'State change')!==false) {
+		echo 
+		str_repeat(' ',59),str_repeat('-',30),PHP_EOL,
+		$line,
+		str_repeat(' ',59),str_repeat('-',30),PHP_EOL;
+	}
+	else echo $line;
+}
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+?>
