@@ -3,9 +3,9 @@
 
 #Path to Store Logs files for each lane
 $laneLogFolder = array(
-	3 => '/home/cbsir/cbsir-log/logs/ee03',
-	4 => '/home/cbsir/cbsir-log/logs/ex04',
-	5 => '/home/cbsir/cbsir-log/logs/ex05'
+	3 => dirname(__FILE__).'/../logs/ee03',
+	4 => dirname(__FILE__).'/../logs/ex04',
+	5 => dirname(__FILE__).'/../logs/ex05'
 );
 
 //----------------------------------------------------------------------------
