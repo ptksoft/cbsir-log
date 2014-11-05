@@ -1,15 +1,40 @@
 #!/usr/bin/php -q
 <?php
+require_once('base');
+
 while ($line = fgets(STDIN)) {
 	if (strpos($line, 'ANT1::sockTransaction')!==false) continue;
+	if (strpos($line, 'ANT2::sockTransaction')!==false) continue;
 	if (strpos($line, 'Shift New')!==false) {
 		echo str_repeat('=',79),PHP_EOL,$line,str_repeat('=',79),PHP_EOL;
 	}
 	else if (strpos($line, 'State change')!==false) {
+		$is_timeout = (strpos($line, 'TIME_OUT)')!==false);
 		echo 
 		str_repeat(' ',59),str_repeat('-',30),PHP_EOL,
+		( ($is_timeout)?(red()):('') ),
 		$line,
+		( ($is_timeout)?(normal()):('') ),
 		str_repeat(' ',59),str_repeat('-',30),PHP_EOL;
+	}
+	else if (strpos($line, 'PushQueue()')!==false) {
+		list($temp1, $qCount) = explode('=', rtrim($line));
+		if ((int)$qCount<2) {
+			echo $line;
+		}
+		else {
+			//echo str_repeat(' ',59),str_repeat('_',30),PHP_EOL;
+			echo $line;
+			echo substr($line,0,16),str_repeat(' ',43),str_repeat('_',17),'ALB-Queue STACKING!!',PHP_EOL;
+		}
+	}
+	else if (strpos($line, 'OB 2 ON')!==false) {
+		echo str_repeat('+', 45), PHP_EOL;
+		echo $line;
+	}
+	else if (strpos($line, 'OB 2 OFF')!==false) {
+		echo $line;
+		echo str_repeat('+', 45), PHP_EOL;
 	}
 	else echo $line;
 }

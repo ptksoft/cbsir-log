@@ -1,0 +1,6 @@
+#!/usr/bin/php -q
+<?php
+echo 'Hello Color', PHP_EOL;
+echo chr(27).'[31mThis is Read'.chr(27).'[0m Color'.PHP_EOL;
+
+?>
