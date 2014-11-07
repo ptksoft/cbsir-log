@@ -1,6 +1,8 @@
 #!/usr/bin/php -q
 <?php
 echo 'Hello Color', PHP_EOL;
-echo chr(27).'[31mThis is Read'.chr(27).'[0m Color'.PHP_EOL;
+for ($i=25; $i<40; $i++) {
+	echo chr(27).'['.$i.'mThis is '.$i.chr(27).'[0m Color'.PHP_EOL;
+}
 
 ?>

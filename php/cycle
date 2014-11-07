@@ -4,11 +4,15 @@ require_once('base');
 
 while ($line = fgets(STDIN)) {
 	if (strpos($line, 'ANT1::sockTransaction')!==false) continue;
-	if (strpos($line, 'ANT2::sockTransaction')!==false) continue;
+	if (strpos($line, 'ANT2')!==false) continue;
+	if (strpos($line, 'Archive File')!==false) continue;
+
+	if (strpos($line, '===')!==false) $line = sky().rtrim($line).normal().PHP_EOL;
+
 	if (strpos($line, 'Shift New')!==false) {
 		echo str_repeat('=',79),PHP_EOL,$line,str_repeat('=',79),PHP_EOL;
 	}
-	else if (strpos($line, 'State change')!==false) {
+	else if (strpos($line, 'State change')!==false) {		## LOGIC State
 		$is_timeout = (strpos($line, 'TIME_OUT)')!==false);
 		echo 
 		str_repeat(' ',59),str_repeat('-',30),PHP_EOL,
@@ -17,26 +21,35 @@ while ($line = fgets(STDIN)) {
 		( ($is_timeout)?(normal()):('') ),
 		str_repeat(' ',59),str_repeat('-',30),PHP_EOL;
 	}
-	else if (strpos($line, 'PushQueue()')!==false) {
+	else if (strpos($line, 'Process packet name')!==false) { ## Command from PLAZA
+		echo blue(),$line,normal();	
+	}
+	else if (strpos($line, '#AVC')!==false) { ## Event AVC when car exit
+		echo violet(),$line,normal();	
+	}
+	else if (strpos($line, 'ALB::DeQueue')!==false) { ## ALB Remove Queue when AVC Event
+		echo green(),$line,normal();	
+	}
+	else if (strpos($line, 'PushQueue()')!==false) {  ## When Approved or ERROR
 		list($temp1, $qCount) = explode('=', rtrim($line));
 		if ((int)$qCount<2) {
-			echo $line;
+			echo yellow(), $line;
 		}
-		else {
-			//echo str_repeat(' ',59),str_repeat('_',30),PHP_EOL;
-			echo $line;
-			echo substr($line,0,16),str_repeat(' ',43),str_repeat('_',17),'ALB-Queue STACKING!!',PHP_EOL;
+		else {	## Stacking Queue to ALB Queue
+			echo yellow(), $line;
+			echo yellow(), substr($line,0,16),str_repeat(' ',43),str_repeat('_',17),'ALB-Queue STACKING!!',PHP_EOL;
+			echo normal();
 		}
 	}
-	else if (strpos($line, 'OB 2 ON')!==false) {
-		echo str_repeat('+', 45), PHP_EOL;
+	else if (strpos($line, 'OB 2 ON')!==false) {	## Sensor OB2 On
+		echo str_repeat('-', 45), PHP_EOL;
 		echo $line;
 	}
-	else if (strpos($line, 'OB 2 OFF')!==false) {
+	else if (strpos($line, 'OB 2 OFF')!==false) {	## Sensor OB2 Off
 		echo $line;
-		echo str_repeat('+', 45), PHP_EOL;
+		echo str_repeat('-', 45), PHP_EOL;
 	}
-	else echo $line;
+	else echo $line;	## Normal Log Line
 }
 
 
