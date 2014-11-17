@@ -1,0 +1,65 @@
+#!/usr/bin/php -q
+<?php
+
+define('T', 'T');
+define('Q', 'Q');
+define('A', 'A');
+
+$stat = array();
+for ($i=0; $i<24; $i++) $stat[sprintf("%02d",$i)] = array(T=>0, Q=>0,A=>0);
+
+while ($line = fgets(STDIN)) {
+	$hr = substr($line, 2, 2);		// Hour number
+
+	if ((strpos($line, 'D[')!==false)&&(strpos($line, '#AVC')!==false)) $stat[$hr][T] += 1;	
+
+	if (strpos($line, '{REQ-')===false) continue;	// Find Request Packet
+	list($d1,$d2,$d3) = explode('-', $line, 3);
+
+	switch ($d2) {
+		case 'CLEAR': $stat[$hr][Q] += 1; break;
+		case 'ON': $stat[$hr][A] += 1; break;
+	}
+}
+
+echo str_repeat('-', 79), PHP_EOL;
+echo 'HR', "\t", 
+	sprintf("%4s",T), "\t", 
+	sprintf("%4s",Q), "\t", 
+	sprintf("%4s",A), 
+	PHP_EOL;
+echo str_repeat('-', 79), PHP_EOL;
+
+$sum_t = 0;
+$sum_q = 0;
+$sum_a = 0;
+
+foreach ($stat as $hr=>$value) {
+	$t = (int)$value[T];
+	$q = (int)$value[Q];
+	$a = (int)$value[A];
+
+	$sum_t += $t;
+	$sum_q += $q;
+	$sum_a += $a;
+
+	echo $hr, "\t", 
+	(($t>0)?(sprintf("%4d", $t)):(' ')), "\t",
+	(($q>0)?(sprintf("%4d", $q)):(' ')), "\t",
+	(($a>0)?(sprintf("%4d", $a)):(' ')),
+	PHP_EOL;
+}
+
+echo str_repeat('-', 79), PHP_EOL;
+echo 'ALL', "\t", 
+	sprintf("%4d", $sum_t), "\t", 
+	sprintf("%4d", $sum_q), "\t", 
+	sprintf("%4d", $sum_a), 
+	PHP_EOL;
+echo str_repeat('-', 79), PHP_EOL;
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+?>
