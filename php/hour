@@ -2,11 +2,10 @@
 <?php
 require_once('base');
 
-if (count($argv)<2) dead('Need Param LaneNum/DateNum/HourNum');
+if (count($argv)<2) dead('Need Param LaneId/DateNum/HourNum');
 if (count(explode('/',$argv[1],3))!=3) dead('Incomplete Param');
 
 list($sLN, $sDT, $sHR) = explode('/',$argv[1],3);
-$iLN = (int)$sLN; if ($iLN<3 || $iLN > 5) $iLN=3;
 $iDT = (int)$sDT; if ($iDT<140101 || $iDT>291212) $iDT = (int)substr(date('Ymd'),2);
 if ($sHR=='') $sHR=date('H');
 $iHR = (int)$sHR; if ($iHR>24) $iHR = (int)date('H');
@@ -15,7 +14,7 @@ $iHR = (int)$sHR; if ($iHR>24) $iHR = (int)date('H');
 #echo 'iLN=',$iLN, ' iDT=',$iDT, ' iHR=',$iHR, PHP_EOL;
 
 $sDT = sprintf("%06d", $iDT);
-$fileLogName = $laneLogFolder[$iLN].'/ALL_20'.substr($sDT,0,2).'-'.substr($sDT,2,2).'-'.substr($sDT,4,2).'.log.gz';
+$fileLogName = LOG_PATH.'/'.$sLN.'/ALL_20'.substr($sDT,0,2).'-'.substr($sDT,2,2).'-'.substr($sDT,4,2).'.log.gz';
 #echo 'fileLogName=',$fileLogName,PHP_EOL;
 
 if (!file_exists($fileLogName)) dead('File Log NOT FOUND!!');

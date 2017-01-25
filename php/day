@@ -2,18 +2,17 @@
 <?php
 require_once('base');
 
-if (count($argv)<2) dead('Need Param LaneNum/DateNum');
+if (count($argv)<2) dead('Need Param LaneID/DateNum');
 if (count(explode('/',$argv[1],2))!=2) dead('Incomplete Param');
 
 list($sLN, $sDT) = explode('/',$argv[1],2);
-$iLN = (int)$sLN; if ($iLN<3 || $iLN > 5) $iLN=3;
 $iDT = (int)$sDT; if ($iDT<140101 || $iDT>291212) $iDT = (int)substr(date('Ymd'),2);
 
 $sDT = sprintf("%06d", $iDT);
-$fileLogName = $laneLogFolder[$iLN].'/ALL_20'.substr($sDT,0,2).'-'.substr($sDT,2,2).'-'.substr($sDT,4,2).'.log.gz';
+$fileLogName = LOG_PATH.'/'.$sLN.'/ALL_20'.substr($sDT,0,2).'-'.substr($sDT,2,2).'-'.substr($sDT,4,2).'.log.gz';
 #echo 'fileLogName=',$fileLogName,PHP_EOL;
 
-if (!file_exists($fileLogName)) dead('File Log NOT FOUND!!');
+if (!file_exists($fileLogName)) dead('File Log NOT FOUND!!: '.$fileLogName);
 $fp = gzopen($fileLogName, 'r');
 if (false===$fp) dead('Cannot Open log file');
 $countLine = 0;

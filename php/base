@@ -2,11 +2,7 @@
 # Base/Core file for SCRIPT and center
 
 #Path to Store Logs files for each lane
-$laneLogFolder = array(
-	3 => dirname(__FILE__).'/home/cbsir/logs/ee03',
-	4 => dirname(__FILE__).'/home/cbsir/logs/ex04',
-	5 => dirname(__FILE__).'/home/cbsir/logs/ex05'
-);
+define('LOG_PATH','/home/cbsir/logs');
 
 //----------------------------------------------------------------------------
 function dead($msg) {
