@@ -1,0 +1,49 @@
+#!/usr/bin/php -q
+<?php
+require_once('base');
+
+define('TAB',"\t");
+$line2filter = 
+'===
+#AVC Detected#
+ALB::DeQueue()
+ALB::PushQueue()
+Logic:
+ANT1::PAN
+AUTO-Barrier:
+MERGE
+REQ-
+Merge';
+$filter = explode("\n", $line2filter);
+
+while ($line = fgets(STDIN)) {
+	$l = '';
+	foreach ($filter as $w) {
+		if (strpos($line, $w)) {
+			$l = $line;	
+			break;
+		}
+	}
+	if (strpos($line, '#AVC')!==false) echo violet();
+	if (strpos($line, 'TIME_OUT)')!==false) echo red();
+	if (strpos($line, 'APPROVED)')!==false) echo green();
+	if (strpos($line, 'AUTO-Barrier: ON')!==false) echo sky();
+	if (strpos($line, 'PAN={')!==false) {
+		$a = split('PAN=', $l);
+		$l = implode(yellow().'PAN=', $a);
+	}
+	if (strpos($line, 'ALB-Queue=')!==false) {
+		$a = split('ALB-Queue=', $l);
+		$l = implode(yellow().'ALB-Queue=', $a);
+	}
+	if (strpos($line, 'Process packet name')!==false) echo blue();
+	echo $l;
+	echo normal();
+	if (strpos($l, 'AUTO-Barrier: OFF')) echo "\n\n";
+}
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+?>

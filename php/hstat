@@ -4,7 +4,7 @@
 define('T', 'T');
 define('Q', 'Q');
 define('A', 'A');
-define('TAB','|');
+define('TAB',"\t");
 
 $stat = array();
 for ($i=0; $i<24; $i++) $stat[sprintf("%02d",$i)] = array(T=>0, Q=>0,A=>0);
