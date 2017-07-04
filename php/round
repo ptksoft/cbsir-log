@@ -13,6 +13,8 @@ ANT1::PAN
 AUTO-Barrier:
 MERGE
 REQ-
+...
+ON_CarForwardPass
 Merge';
 $filter = explode("\n", $line2filter);
 
