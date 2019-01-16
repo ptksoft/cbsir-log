@@ -1,0 +1,71 @@
+#!/usr/bin/php -q
+<?php
+require_once('base');
+
+$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+socket_connect($sock, '192.168.1.222', 11100);
+
+$diff = null;
+while ($line = fgets(STDIN)) {
+
+	$time = getTime($line);
+
+	while ($time > now()) {
+		usleep(10);
+	}
+
+	if (strpos($line, 'OB 1 ON')!==false) {    ## Sensor OB1 On
+		$line = sky().rtrim($line).normal().PHP_EOL;
+		socket_write($sock, "/OB1/1\r\n");
+	} else if (strpos($line, 'OB 1 OFF')!==false) {    ## Sensor OB1 Off
+		$line = sky().rtrim($line).normal().PHP_EOL;
+		socket_write($sock, "/OB1/0\r\n");
+	} else if (strpos($line, 'LOOP 1 ON')!==false) {    ## Sensor LOOP1 On
+		$line = sky().rtrim($line).normal().PHP_EOL;
+		socket_write($sock, "/LOOP1/1\r\n");
+	} else if (strpos($line, 'LOOP 1 OFF')!==false) {    ## Sensor LOOP1 Off
+		$line = sky().rtrim($line).normal().PHP_EOL;
+		socket_write($sock, "/LOOP1/0\r\n");
+	} else if (strpos($line, 'OB 2 ON')!==false) {    ## Sensor OB2 On
+		$line = sky().rtrim($line).normal().PHP_EOL;
+		socket_write($sock, "/OB2/1\r\n");
+        } else if (strpos($line, 'OB 2 OFF')!==false) {    ## Sensor OB2 Off
+		$line = sky().rtrim($line).normal().PHP_EOL;
+		socket_write($sock, "/OB2/0\r\n");
+        } else if (strpos($line, 'LOOP 2 ON')!==false) {    ## Sensor LOOP2 On
+		$line = sky().rtrim($line).normal().PHP_EOL;
+		socket_write($sock, "/LOOP2/1\r\n");
+        } else if (strpos($line, 'LOOP 2 OFF')!==false) {    ## Sensor LOOP2 Off
+		$line = sky().rtrim($line).normal().PHP_EOL;
+		socket_write($sock, "/LOOP2/0\r\n");
+        } else {
+		$line = "";
+	}
+	echo $line;
+}
+
+function getTime($line) {
+	global $diff;
+	$t1 = new DateTime(date('Y-m-d') . ' ' . substr($line, 2, 2) . ':' . substr($line, 4, 2) . ':' . substr($line, 6, 2) . '.' . substr($line,9, 6));
+	if($diff === null) {
+		$t = microtime(true);
+		$micro = sprintf("%06d",($t - floor($t)) * 1000000);
+		$t2 = new DateTime( date('Y-m-d H:i:s.'.$micro, $t) );
+                $diff = $t1->diff($t2);
+        }
+	$t1->add($diff);
+	return $t1->format("ymdHisu");
+}
+
+function now() {
+	$t = microtime(true);
+	$micro = sprintf("%06d",($t - floor($t)) * 1000000);
+	$d = new DateTime( date('Y-m-d H:i:s.'.$micro, $t) );
+
+	return $d->format("ymdHisu");
+}
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+?>
