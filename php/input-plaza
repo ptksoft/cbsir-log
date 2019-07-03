@@ -1,0 +1,50 @@
+#!/usr/bin/php -q
+<?php
+
+define('TAB',"\t");
+
+$stat = array();
+for ($i=0; $i<24; $i++) $stat[sprintf("%02d",$i)] = array();
+$all_pz = array();
+
+while ($line = fgets(STDIN)) {
+	$hr = substr($line, 2, 2);		// Hour number
+	if (false===strpos($line,'Set CurrentInputPlaza =')) continue;
+	$ar = explode('=', $line, 2);
+	if (count($ar)!=2) continue;
+	$pzid = trim($ar[1]);
+	if (! isset($stat[$hr][$pzid])) $stat[$hr][$pzid] = 1;
+	else $stat[$hr][$pzid] = $stat[$hr][$pzid] + 1;
+
+	$all_pz[$pzid] = true;
+}
+$col = array_keys($all_pz);
+sort($col);
+
+echo str_repeat('-', 79), PHP_EOL;
+echo 'HR', TAB;
+foreach ($col as $pzid) 
+	echo sprintf("%3d", $pzid), TAB;
+echo PHP_EOL;
+echo str_repeat('-', 79), PHP_EOL;
+
+foreach ($stat as $hr=>$value) {
+	echo $hr, TAB;
+	foreach ($col as $pzid) {
+		$v = 0;
+		if (isset($value[$pzid])) $v = $value[$pzid];
+		echo (($v>0)?(sprintf("%3d", $v)):(' ')), TAB;
+	}
+	echo PHP_EOL;
+}
+
+echo str_repeat('-', 79), PHP_EOL;
+echo 'ALL', TAB, 
+	PHP_EOL;
+echo str_repeat('-', 79), PHP_EOL;
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+?>
