@@ -1,0 +1,100 @@
+#!/usr/bin/php -q
+<?php
+
+define('T', 'T');
+define('Q', 'Q');
+define('A', 'A');
+define('C', 'C');
+define('E', 'E');
+define('EE03', 'EE03');
+define('EE06', 'EE06');
+define('EE10', 'EE10');
+define('TAB',"\t");
+
+$stat = array();
+for ($i=0; $i<24; $i++) $stat[sprintf("%02d",$i)] = array(T=>0, Q=>0,A=>0,C=>0,E=>0,EE03=>0,EE06=>0,EE10=>0);
+
+while ($line = fgets(STDIN)) {
+	$hr = substr($line, 2, 2);		// Hour number
+
+	if ((strpos($line, 'D[')!==false)&&(strpos($line, '#AVC')!==false)) $stat[$hr][T] += 1;	
+	if (strpos($line, 'card-queue')!==false) $stat[$hr][C] += 1;
+	if (strpos($line, '{MoneyNotEnought}')!==false) $stat[$hr][E] += 1;
+
+	if (strpos($line, 'ReceiptData Plaza(21)')!==false) {
+		if (strpos($line, 'Lane(3)')!==false) $stat[$hr][EE03] += 1;
+		if (strpos($line, 'Lane(6)')!==false) $stat[$hr][EE06] += 1;
+		if (strpos($line, 'Lane(10)')!==false) $stat[$hr][EE10] += 1;
+	}
+
+	if (strpos($line, '{REQ-')===false) continue;	// Find Request Packet
+	list($d1,$d2,$d3) = explode('-', $line, 3);
+	switch ($d2) {
+		case 'CLEAR': $stat[$hr][Q] += 1; break;
+		case 'ON': $stat[$hr][A] += 1; break;
+	}
+}
+
+echo str_repeat('-', 79), PHP_EOL;
+echo 'HR', TAB, 
+	sprintf("%4s",T), TAB, 
+	sprintf("%4s",Q), TAB, 
+	sprintf("%4s",A), TAB,
+	sprintf("%4s",E), TAB,
+	sprintf("%4s",C), TAB,
+	sprintf("%5s",EE03), TAB,
+	sprintf("%5s",EE06), TAB,
+	sprintf("%5s",EE10), TAB,
+	PHP_EOL;
+echo str_repeat('-', 79), PHP_EOL;
+
+$sum_t = 0;
+$sum_q = 0;
+$sum_a = 0;
+$sum_e = 0;
+$sum_c = 0;
+
+foreach ($stat as $hr=>$value) {
+	$t = (int)$value[T];
+	$q = (int)$value[Q];
+	$a = (int)$value[A];
+	$e = (int)$value[E];
+	$c = (int)$value[C];
+	$e3 = (int)$value[EE03];
+	$e6 = (int)$value[EE06];
+	$e10 = (int)$value[EE10];
+
+	$sum_t += $t;
+	$sum_q += $q;
+	$sum_a += $a;
+	$sum_e += $e;
+	$sum_c += $c;
+
+	echo $hr, TAB, 
+	(($t>0)?(sprintf("%4d", $t)):(' ')), TAB,
+	(($q>0)?(sprintf("%4d", $q)):(' ')), TAB,
+	(($a>0)?(sprintf("%4d", $a)):(' ')), TAB,
+	(($e>0)?(sprintf("%4d", $e)):(' ')), TAB,
+	(($c>0)?(sprintf("%4d", $c)):(' ')), TAB,
+	(($e3>0)?(sprintf("%5d", $e3)):(' ')), TAB,
+	(($e6>0)?(sprintf("%5d", $e6)):(' ')), TAB,
+	(($e10>0)?(sprintf("%5d", $e10)):(' ')),
+
+	PHP_EOL;
+}
+
+echo str_repeat('-', 79), PHP_EOL;
+echo 'ALL', TAB, 
+	sprintf("%4d", $sum_t), TAB, 
+	sprintf("%4d", $sum_q), TAB, 
+	sprintf("%4d", $sum_a), TAB,
+	sprintf("%4d", $sum_e), TAB,
+	sprintf("%4d", $sum_c),
+	PHP_EOL;
+echo str_repeat('-', 79), PHP_EOL;
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+?>

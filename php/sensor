@@ -5,6 +5,45 @@ require_once('base');
 $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 socket_connect($sock, '192.168.1.222', 11100);
 
+//================================================================================================
+function post_antenna_frame ($pan) {
+	$pan2 = str_pad($pan, 28, "0", STR_PAD_RIGHT);
+	$a14 = [];
+	while (strlen($pan2)>0) {
+		$a14[] = substr($pan2,0,2);
+		$pan2 = substr($pan2,2);
+	}
+	$pan3 = implode(" ", $a14);
+	$xml = <<<EOT
+<?xml version="1.0"?>\r
+<stream id="14340">\r
+  <dsrc_frame lid="02 EE 0C 9F" type="3" signal_level="154" state="Active">\r
+    <tapdu type="GetResponse" eid="1">\r
+      <attribute id="17">01</attribute>\r
+      <attribute id="24">04 26 6C 30</attribute>\r
+      <attribute id="32">${pan3}</attribute>\r
+      <attribute id="33">36 26 37 67 09 7A 3A 00 1F 03 01 00 00 00 00 00 00 00 09 7A 3A 00 01 01 00 00 00 00</attribute>\r
+      <attribute id="107">13</attribute>\r
+      <attribute id="108">00 00 01 11 70</attribute>\r
+    </tapdu>\r
+  </dsrc_frame>\r
+</stream>\r
+\r
+EOT;
+	$url = 'http://192.168.1.222:8081';
+	//$url = 'http://192.168.1.132:8081';
+	//$url = 'http://127.0.0.1:8081';
+	$context = stream_context_create(array(
+		'http' => array(
+			'method' => 'POST',
+			'header' => "Content-Type: application/xml\r\nContent-Length: ".(strlen($xml)-1),
+			'content' => $xml
+		)
+	));
+	$result = file_get_contents($url, false, $context);
+}
+//================================================================================================
+
 $diff = null;
 while ($line = fgets(STDIN)) {
 
@@ -14,7 +53,12 @@ while ($line = fgets(STDIN)) {
 		usleep(10);
 	}
 
-	if (strpos($line, 'OB 1 ON')!==false) {    ## Sensor OB1 On
+	if (strpos($line, ' ANT1::PAN=')!==false) {
+		$i = strpos($line, '={');
+		$pan = substr($line, ($i+2), 19);
+		post_antenna_frame($pan);
+		$line = 'Found PAN = ' . $pan . PHP_EOL;
+	} else if (strpos($line, 'OB 1 ON')!==false) {    ## Sensor OB1 On
 		$line = sky().rtrim($line).normal().PHP_EOL;
 		socket_write($sock, "/OB1/1\r\n");
 	} else if (strpos($line, 'OB 1 OFF')!==false) {    ## Sensor OB1 Off

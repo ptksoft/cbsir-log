@@ -1,0 +1,6 @@
+.bash*
+logs/*
+.profile*
+.vim*
+.gitconfig
+.lesshst
