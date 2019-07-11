@@ -10,9 +10,10 @@ $iDT = (int)$sDT; if ($iDT<140101 || $iDT>291212) $iDT = (int)substr(date('Ymd')
 
 $sDT = sprintf("%06d", $iDT);
 $fileLogName = LOG_PATH.'/'.$sLN.'/ALL_20'.substr($sDT,0,2).'-'.substr($sDT,2,2).'-'.substr($sDT,4,2).'.log.gz';
-#echo 'fileLogName=',$fileLogName,PHP_EOL;
-
+if (!file_exists($fileLogName)) 
+	$fileLogName = LOG_PATH.'/'.$sLN.'/20'.substr($sDT,0,2).'-'.substr($sDT,2,2).'-'.substr($sDT,4,2).'.log.gz';
 if (!file_exists($fileLogName)) dead('File Log NOT FOUND!!: '.$fileLogName);
+
 $fp = gzopen($fileLogName, 'r');
 if (false===$fp) dead('Cannot Open log file');
 $countLine = 0;

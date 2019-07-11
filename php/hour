@@ -15,8 +15,7 @@ $iHR = (int)$sHR; if ($iHR>24) $iHR = (int)date('H');
 
 $sDT = sprintf("%06d", $iDT);
 $fileLogName = LOG_PATH.'/'.$sLN.'/ALL_20'.substr($sDT,0,2).'-'.substr($sDT,2,2).'-'.substr($sDT,4,2).'.log.gz';
-#echo 'fileLogName=',$fileLogName,PHP_EOL;
-
+if (!file_exists($fileLogName)) $fileLogName = LOG_PATH.'/'.$sLN.'/20'.substr($sDT,0,2).'-'.substr($sDT,2,2).'-'.substr($sDT,4,2).'.log.gz';
 if (!file_exists($fileLogName)) dead('File Log NOT FOUND!!');
 $fp = gzopen($fileLogName, 'r');
 if (false===$fp) dead('Cannot Open log file');
@@ -28,11 +27,17 @@ while (!gzeof($fp)) {
 	$countLine++;
 	$dat1 = substr(rtrim($line),2);
 	if (! $isFound) {
-		if ($sHour != substr($dat1,0,2)) continue;
-		$isFound = true;	// Found correct Hour
+		if (preg_match('/^[A-Z]\[\d{6}\:\d{6}]/', $line)) {
+			if ($sHour != substr($dat1,0,2)) continue;
+			$isFound = true;	// Found correct Hour
+		}
 	}
 	else {
-		if ($sHour != substr($dat1,0,2)) break;
+		if (preg_match('/^[A-Z]\[\d{6}\:\d{6}]/', $line)) {
+			if ($sHour != substr($dat1,0,2)) {
+				break;
+			}
+		}
 	}
 	
 	print (rtrim($line).PHP_EOL);
