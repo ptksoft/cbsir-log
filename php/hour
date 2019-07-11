@@ -25,15 +25,17 @@ $isFound = false;
 while (!gzeof($fp)) {
 	$line = gzgets($fp);
 	$countLine++;
-	$dat1 = substr(rtrim($line),2);
 	if (! $isFound) {
 		if (preg_match('/^[A-Z]\[\d{6}\:\d{6}]/', $line)) {
+			$dat1 = substr(rtrim($line),2);
 			if ($sHour != substr($dat1,0,2)) continue;
 			$isFound = true;	// Found correct Hour
 		}
+		else continue;
 	}
 	else {
 		if (preg_match('/^[A-Z]\[\d{6}\:\d{6}]/', $line)) {
+			$dat1 = substr(rtrim($line),2);
 			if ($sHour != substr($dat1,0,2)) {
 				break;
 			}
