@@ -1,0 +1,124 @@
+#!/usr/bin/php -q
+<?php
+require_once('base');
+
+$is_over = false;
+$pre_push = '';
+$pre_alb = '';
+$pre_deq = '';
+$alb_last = '';
+$tm_last_push = 0;
+
+$in_cycle = false;
+
+while ($line = fgets(STDIN)) {
+	if (! preg_match('/^[A-Z]\[\d{6}\:\d{6}]/', $line)) continue;
+	$hr = substr($line, 2, 2);		// Hour number
+
+	if (strpos($line, 'ALB::DeQueue()')) {
+		if ( preg_match('/ALB-Queue=(\d{1,})/', $line, $match)) {
+			if ($match[1]>0) {
+				$is_over = true;
+				echo "\t",$line;
+				$pre_deq = $line;
+			}
+			else if ($is_over) { 
+				$is_over = false;
+				echo "\t",$line;
+				// check GAB of second
+				if (
+					(preg_match('/\[(\d{2})(\d{2})(\d{2})\:/', $pre_deq, $m1)) &&
+					(preg_match('/\[(\d{2})(\d{2})(\d{2})\:/', $line, $m2))
+				) {
+					$t1 = mktime($m1[1], $m1[2], $m1[3]);
+					$t2 = mktime($m2[1], $m2[2], $m2[3]);
+					$total_sec = $t2 - $t1;
+					if ($total_sec >= 5) echo red();
+					echo "\t\tDifference second = ", $total_sec, normal(), PHP_EOL;
+				}
+				//echo "\n";
+			}
+		}
+	}
+	else if (strpos($line, 'ALB::PushQueue()')) {
+		if (strpos($line, '{EVENT}')) continue;	// PushQueue from EVENT must SKIP
+		if ( preg_match('/ALB-Queue=(\d{1,})/', $line, $match)) {
+			if ($match[1]>1) {
+				$is_over = true;
+				if (strlen($pre_push)) {
+					echo $pre_push;
+					$pre_push = '';
+				}
+				if (strlen($pre_alb)) {
+					echo $pre_alb;
+					$pre_alb = '';
+				}
+				echo $line;
+			}
+			else if ($is_over) {
+				//echo "\n";
+				//$is_over = false;
+			}
+			else {
+				$pre_push = $line;
+			}
+
+			// check Second DIFF with previous-push
+			if (
+				(preg_match('/\[(\d{2})(\d{2})(\d{2})\:/', $line, $m2))
+			) {
+				$t2 = mktime($m2[1], $m2[2], $m2[3]);
+				if ($tm_last_push > 0) {
+					$total_sec = $t2 - $tm_last_push;
+					if ($total_sec <= 2) {
+						echo red();
+						echo "\t*** OneCar 2 TAG, Too Closed second = ", $total_sec, normal(), PHP_EOL;
+					}
+					else {
+					}
+				}
+				$tm_last_push = $t2;
+			}
+		}
+	}
+
+	if (strpos($line, 'UpdateEquipmentState ALB =')) {
+		if (preg_match('/ALB \=\s(\D{2,3})\s$/', $line, $m)) {
+			switch ($m[1]) {
+				case 'ON':
+					if ($alb_last != 'ON') {
+						$alb_last = 'ON';
+						//echo green(), $line, 'ON', normal(), PHP_EOL;
+						$pre_alb = "\t".green().$line;
+					}
+					break;
+				case 'OFF':
+					if ($alb_last != 'OFF') {
+						$alb_last = 'OFF';
+						if (strlen($pre_alb)) {
+							//echo $pre_alb; 
+						}
+						else {
+							echo "\t";
+							echo yellow(), $line, normal(), PHP_EOL, PHP_EOL;
+						}
+					}
+					break;
+				default:
+					echo '[', red(), $m[1], ']',  normal(), PHP_EOL;
+					break;
+			}
+		}
+	}
+
+	if ($is_over && strpos($line, 'ProcessEvent: AVC')) echo blue(), "\t",$line, normal();
+
+	if ($is_over && strpos($line, 'BalanceMinRequire')) echo red(), "", $line, normal();
+}
+
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+?>
