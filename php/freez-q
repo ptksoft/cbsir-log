@@ -15,7 +15,11 @@ while ($line = fgets(STDIN)) {
 	if (! preg_match('/^[A-Z]\[\d{6}\:\d{6}]/', $line)) continue;
 	$hr = substr($line, 2, 2);		// Hour number
 
-	if (strpos($line, 'ALB::DeQueue()')) {
+	if (strpos($line, 'CLQ')) {
+		echo violet();
+		echo $line;
+	}
+	else if (strpos($line, 'ALB::DeQueue()')) {
 		if ( preg_match('/ALB-Queue=(\d{1,})/', $line, $match)) {
 			if ($match[1]>0) {
 				$is_over = true;
@@ -82,8 +86,11 @@ while ($line = fgets(STDIN)) {
 		}
 	}
 
+	if (strpos($line, 'SetOpenBySlave(PassageCode')) {
+		echo violet(), $line, normal(), PHP_EOL;
+	}
 	if (strpos($line, 'UpdateEquipmentState ALB =')) {
-		if (preg_match('/ALB \=\s(\D{2,3})\s$/', $line, $m)) {
+		if (preg_match('/ALB\s\=\s([A-Z]{2,})\s$/', $line, $m)) {
 			switch ($m[1]) {
 				case 'ON':
 					if ($alb_last != 'ON') {
@@ -105,7 +112,9 @@ while ($line = fgets(STDIN)) {
 					}
 					break;
 				default:
-					echo '[', red(), $m[1], ']',  normal(), PHP_EOL;
+					echo $line, PHP_EOL;
+					echo '/', $m[1], '/', PHP_EOL;
+					echo strlen($m[1]), PHP_EOL;
 					break;
 			}
 		}

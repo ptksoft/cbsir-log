@@ -8,6 +8,10 @@ while ($line = fgets(STDIN)) {
 	if (strpos($line, 'Archive File')!==false) continue;
 
 	if (strpos($line, '===')!==false) $line = sky().rtrim($line).normal().PHP_EOL;
+	if (strpos($line, 'Begin ENTRY_OB = ON')!==false) $line = violet().rtrim($line).normal().PHP_EOL;
+	if (strpos($line, 'Begin ENTRY_LOOP = ON')!==false) $line = violet().rtrim($line).normal().PHP_EOL;
+	if (strpos($line, 'Begin ENTRY_OB = OFF')!==false) $line = sky().rtrim($line).normal().PHP_EOL;
+	if (strpos($line, 'Begin ENTRY_LOOP = OFF')!==false) $line = sky().rtrim($line).normal().PHP_EOL;
 
 	if (strpos($line, 'Shift New')!==false) {
 		echo str_repeat('=',79),PHP_EOL,$line,str_repeat('=',79),PHP_EOL;

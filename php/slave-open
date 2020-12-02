@@ -1,0 +1,45 @@
+#!/usr/bin/php -q
+<?php
+require_once('base');
+
+
+$total_sro = 0;
+$total_02 = 0;
+$total_82 = 0;
+$total_00 = 0;
+$total_exit = 0;
+
+while ($line = fgets(STDIN)) {
+	if (! preg_match('/^[A-Z]\[\d{6}\:\d{6}]/', $line)) continue;
+	$hr = substr($line, 2, 2);		// Hour number
+
+
+	if (preg_match('/SetOpenBySlave\(PassageCode=(\d{1,})\)/', $line, $m)) {
+		$total_sro ++;
+		switch ($m[1]) {
+			case '02':	$total_02++;	break;
+			case '82':	$total_82++;	break;
+			default:	$total_00++;	break;
+		}
+		continue;
+	}
+
+	if (preg_match('/\sProcess\:\sCarExit/', $line)) $total_exit++;
+}
+
+echo PHP_EOL;
+echo 'Total Traffic       = ', sky(), number_format($total_exit), normal(), PHP_EOL;
+echo 'Total Open by Slave = ', 
+	red(), number_format($total_sro), normal(), 
+	' percentage = ', yellow(), number_format(($total_sro/$total_exit)*100,2), normal(), ' %', 
+	PHP_EOL;
+echo "\t\tOpen by code 02 = ", violet(), number_format($total_02), normal(), PHP_EOL;
+echo "\t\tOpen by code 82 = ", red(), number_format($total_82), normal(), PHP_EOL;
+echo "\t\tOpen by code 00 = ", number_format($total_00), PHP_EOL;
+echo PHP_EOL, PHP_EOL;
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+?>

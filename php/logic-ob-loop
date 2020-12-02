@@ -1,0 +1,95 @@
+#!/usr/bin/php -q
+<?php
+/*
+Logic try find cycle Sensor + Approved tag
+cycle and check Out Of sensor on/of cycle Approved
+in sensor mode OB->LOOP
+
+*/
+require_once('base');
+
+define('TAB',"\t");
+$line2filter = 
+'===
+CarEntry
+#AVC Detected#
+ALB::DeQueue()
+ALB::PushQueue()
+Logic:
+ANT1::PAN
+AUTO-Barrier:
+MERGE
+REQ-
+ON_CarForwardPass
+ENTRY_LOOP
+ENTRY_OB
+Merge';
+$filter = explode("\n", $line2filter);
+
+$isStartEntry = false;
+$countInCycle = 0;
+$countOutCycle = 0;
+$countNoTag = 0;
+$isApproved = true;
+while ($line = fgets(STDIN)) {
+	if (strpos($line,'TRY_STATE_ALB')) continue;
+	if (strpos($line,'_transETC')) continue;
+
+	$l = '';
+	foreach ($filter as $w) {
+		if (strpos($line, $w)) {
+			$l = $line;	
+			break;
+		}
+	}
+	if (strpos($line, 'Begin ENTRY_OB = ON')!==false) {
+		$isStartEntry = true;
+		echo PHP_EOL, PHP_EOL;
+	}
+	if (strpos($line, '___End ENTRY_LOOP = OFF')!==false) {
+		$isStartEntry = false;
+		if ($isApproved) $isApproved = false;
+		else {
+			$countNoTag++;
+			echo violet(), '*** NO TAG FOUND ***', PHP_EOL;
+		}
+	}
+
+	if (
+		(strpos($line, 'ProcessEvent')!==false) &&
+		(strpos($line, 'CarEntry')!==false) 
+	)	echo red();
+	if (strpos($line, '#AVC')!==false) echo violet();
+	if (strpos($line, 'TIME_OUT)')!==false) echo red();
+	if (strpos($line, 'APPROVED)')!==false) {
+		$isApproved = true;
+		if ($isStartEntry) $countInCycle++; 
+		else {
+			$countOutCycle++;
+			echo violet(), '*** Approved OUT OF CYCLE ***', PHP_EOL;
+		}
+		echo green();
+	}
+	if (strpos($line, 'AUTO-Barrier: ON')!==false) echo sky();
+	if (strpos($line, 'PAN={')!==false) {
+		$a = split('PAN=', $l);
+		$l = implode(yellow().'PAN=', $a);
+	}
+	if (strpos($line, 'ALB-Queue=')!==false) {
+		$a = split('ALB-Queue=', $l);
+		$l = implode(yellow().'ALB-Queue=', $a);
+	}
+	if (strpos($line, 'Process packet name')!==false) echo blue();
+	echo $l;
+	echo normal();
+	if (strpos($l, 'AUTO-Barrier: OFF')) echo "\n\n";
+}
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+echo 'Total CountInCycle = ', number_format($countInCycle), PHP_EOL;
+echo 'Total CountOutCycle = ', number_format($countOutCycle), PHP_EOL;
+echo 'Total NoTag  = ', number_format($countNoTag), PHP_EOL;
+?>
