@@ -1,0 +1,144 @@
+#!/usr/bin/php -q
+<?php
+require_once('base');
+
+// {{{ Declare & Prepare
+define ('LP1', 'LP1');
+define ('OB1', 'OB1');
+define ('Q', 'Q');
+define ('T', 'T');
+define ('ALB', 'ALB');
+define ('LP2', 'LP2');
+define ('OB2', 'OB2');
+define ('CMD', 'CMD');
+define ('STATE', 'STATE');
+
+$D = [
+	LP1	=> 0,
+	OB1	=> 0,
+	Q	=> 0,
+	T	=> '',
+	ALB	=> 0,
+	LP2	=> 0,
+	OB2	=> 0,
+	CMD => '',
+	STATE => '',
+	];
+// }}}
+
+function show_line($header) {/*{{{*/
+	global $D;
+
+	echo normal(), $header;
+
+	// Front Present	{{{
+	if ($D[OB1]) echo green();
+	echo OB1, ' ', normal();
+
+	if ($D[LP1]) echo green();
+	echo LP1, ' ', normal();
+	// }}}
+	// Queue	{{{
+	echo Q, ':';
+	if ($D[Q]) echo red();
+	echo $D[Q], ' ', normal();
+	// }}}
+	// TAG	{{{
+	echo T, ':';
+	if ($D[T]) echo yellow();
+	echo str_pad($D[T],19,' '), ' ', normal();
+	if (strlen($D[T])!=19) $D[T] = '';		// if NOT PAN information then auto-clear
+	// }}}
+	// ALB	{{{
+	if ($D[ALB]) echo green();
+	echo ALB, ' ', normal();
+	// }}}
+	// Back Present	{{{
+	if ($D[LP2]) echo green();
+	echo LP2, ' ', normal();
+
+	if ($D[OB2]) echo green();
+	echo OB2, ' ', normal();
+	// }}}
+	// Command from plaza 	{{{
+	echo CMD, ':';
+	if ($D[CMD]) echo yellow();
+	echo str_pad($D[CMD],3,' '), ' ', normal();
+	if ($D[CMD]) $D[CMD] = '';		// auto clear command history
+	// }}}
+
+	echo STATE,':',$D[STATE], ' ', normal();
+
+	//==========
+	echo PHP_EOL;
+}/*}}}*/
+
+while ($line = fgets(STDIN)) {
+	if (strlen($line) < 17) continue;
+	if (preg_match('/^[A-Z]\[\d{6}\:\d{6}\]/', $line)) $h = substr($line,0,17);
+
+	while (TRUE) {
+		// Front Present	{{{
+		if (strpos($line, 'Begin ENTRY_OB = ON')!==false) { $D[OB1]=1; break; }
+		if (strpos($line, 'Begin ENTRY_LOOP = ON')!==false) { $D[LP1]=1; break; }
+		if (strpos($line, 'Begin ENTRY_OB = OFF')!==false) { $D[OB1]=0; break; }
+		if (strpos($line, 'Begin ENTRY_LOOP = OFF')!==false) { $D[LP1]=0; break; }
+		// }}}
+
+		if (preg_match('/Current ALB-Queue=(\d+)/', $line, $m)) { $D[Q] = $m[1]; break; }
+
+		// PAN Reading	{{{
+		if (preg_match('/"PAN": "(\d{19})"/', $line, $m)) { $D[T] = $m[1]; break; }
+		if (preg_match('/IsOpen=FALSE/', $line)) {$D[T] = 'Cur-Queue-NO-OPEN'; break; }
+		if (preg_match('/ess Read PAN={\d{19}} Class={(\d)} Balance={(\d+)}/', $line, $m)) {
+			$D[T] = 'C='.$m[1].' B='.$m[2];
+			break; 
+		}
+		if (preg_match('/ReceiptData Plaza{(\d+)} Lane{(\d+)} Fee{(\d+)}/', $line, $m)) {
+			$D[T] = 'P='.$m[1].' L='.$m[2].' F='.$m[3];
+			break; 
+		}
+		if (preg_match('/LOGIC_ERROR\.(\w+)/', $line, $m)) { $D[T] = $m[1]; break; }
+		// }}}
+
+		// ALB State	{{{
+		if (preg_match('/UpdateEquipmentState ALB = ON/', $line)) {$D[ALB] = 1; break; }
+		if (preg_match('/UpdateEquipmentState ALB = OFF/', $line)) {$D[ALB] = 0; break; }
+		// }}}
+
+		// Back Present	{{{
+		if (preg_match('/UpdateEquipmentState LOOP2 = ON/', $line)) {$D[LP2] = 1; break; }
+		if (preg_match('/UpdateEquipmentState LOOP2 = OFF/', $line)) {$D[LP2] = 0; break; }
+		if (preg_match('/UpdateEquipmentState OB2 = ON/', $line)) {$D[OB2] = 1; break; }
+		if (preg_match('/UpdateEquipmentState OB2 = OFF/', $line)) {$D[OB2] = 0; break; }
+		// }}}
+
+		// Packet Command	{{{
+		if (preg_match('/Got Packet Name\{([A-Z]{3})\}/', $line, $m)) { 
+			$D[CMD] = $m[1]; 
+			$D[T] = '';
+			break; 
+		}
+		// }}}
+
+		// Logic State	{{{
+		if (preg_match('/State change\(\w+\s\-\>\s(\w+)\)/', $line, $m)) { 
+			$D[STATE] = $m[1]; 
+			if ((! empty($D[T])) && strlen($D[T]!=19)) $D[T] = '';
+			break; 
+		}
+		// }}}
+
+		$line = NULL;
+		break;
+	}
+	if (empty($line)) continue;
+	show_line($h);
+	continue;
+}
+
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+?>
